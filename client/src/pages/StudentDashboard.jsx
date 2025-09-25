@@ -19,7 +19,7 @@ function StudentDashboard() {
 
     const fetchQuestion = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/polls/${pollId}`);
+        const res = await axios.get(`https://intervue-backend-lltr.onrender.com/api/polls/${pollId}`);
         const active = res.data.data.activeQuestion;
 
         if (active && active._id !== questionId) {
@@ -87,7 +87,7 @@ function StudentDashboard() {
   const submitAnswer = async () => {
     if (selectedIndex === null || submitted || timeLeft === 0) return;
     try {
-      await axios.post("http://localhost:5000/api/polls/submit-answer", {
+      await axios.post("https://intervue-backend-lltr.onrender.com/api/polls/submit-answer", {
         pollId,
         studentName: name,
         answerIndex: selectedIndex,
@@ -102,7 +102,7 @@ function StudentDashboard() {
   // Fetch live results
   const fetchLiveResults = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/polls/${pollId}/live-result`);
+      const res = await axios.get(`https://intervue-backend-lltr.onrender.com/api/polls/${pollId}/live-result`);
       setResults(res.data.data);
     } catch (err) {
       console.error("Failed to fetch results:", err);

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/polls"; // Update if your backend URL is different
+const API_URL = "https://intervue-backend-lltr.onrender.com/api/polls"; // Update if your backend URL is different
 
 // Create a new poll
 export const createPoll = (title) => axios.post(`${API_URL}`, { title });

@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-const API_URL = "http://localhost:5000/api/polls";
+const API_URL = "https://intervue-backend-lltr.onrender.com/api/polls";
 
 function PollHistory() {
   const { pollId } = useParams();

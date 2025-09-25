@@ -16,7 +16,7 @@ function StudentHome() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/polls/join", {
+      const res = await fetch("https://intervue-backend-lltr.onrender.com/api/polls/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pollId, name, studentId }),

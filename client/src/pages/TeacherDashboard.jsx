@@ -135,7 +135,7 @@ function TeacherDashboard() {
   const fetchLiveResults = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/polls/${id}/live-result`
+        `https://intervue-backend-lltr.onrender.com/api/polls/${id}/live-result`
       );
       setResults(res.data.data);
     } catch (err) {
