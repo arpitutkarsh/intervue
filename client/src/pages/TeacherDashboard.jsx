@@ -162,7 +162,7 @@ function TeacherDashboard() {
   const textareaHeight = windowHeight - 300; // adjust 300 as needed
 
   return (
-    <div className="w-screen h-screen min-h-screen max-h-200 overflow-hidden p-6  bg-gray-50 relative">
+    <div className="w-screen h-screen min-h-screen max-h-200 overflow-auto p-6  bg-gray-50 relative">
       {/* Intervue Poll Badge */}
       <div className="absolute top-6 left-6 ml-5 flex items-center gap-2 w-[134px] h-[31px] bg-gradient-to-r from-[#7565D9] to-[#4D0ACD] rounded-[24px] px-2 py-0">
         <div className="w-[14.66px] h-[14.65px] bg-white rounded-full"></div>
