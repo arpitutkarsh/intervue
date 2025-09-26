@@ -22,8 +22,9 @@ function TeacherDashboard() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [results, setResults] = useState(null);
 
-  const [isCopied, setIsCopied] = useState(false);
+  const [showParticipantsModal, setShowParticipantsModal] = useState(false);
 
+  const [isCopied, setIsCopied] = useState(false);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 
   // Update window height on resize
@@ -41,6 +42,7 @@ function TeacherDashboard() {
         const pollData = res.data.data;
         setPoll(pollData);
 
+        // Set active question and calculate remaining time
         const active = pollData.activeQuestion;
         if (active && !active.ended) {
           setActiveQuestion(active);
@@ -49,8 +51,7 @@ function TeacherDashboard() {
           const remaining = Math.max(
             0,
             Math.ceil(
-              (startedAt.getTime() + active.timeLimitSec * 1000 - now.getTime()) /
-                1000
+              (startedAt.getTime() + active.timeLimitSec * 1000 - now.getTime()) / 1000
             )
           );
           setTimeLeft(remaining);
@@ -79,6 +80,7 @@ function TeacherDashboard() {
     return () => clearInterval(timer);
   }, [timeLeft, activeQuestion]);
 
+  // Options handlers
   const handleOptionChange = (index, value) => {
     const newOptions = [...options];
     newOptions[index] = value;
@@ -92,6 +94,7 @@ function TeacherDashboard() {
     if (correctIndex >= newOptions.length) setCorrectIndex(0);
   };
 
+  // Ask question
   const handleAskQuestion = async () => {
     const cleanOptions = options.map((o) => o.trim()).filter(Boolean);
     if (!questionText.trim() || cleanOptions.length < 2) {
@@ -132,6 +135,7 @@ function TeacherDashboard() {
     }
   };
 
+  // Fetch live results
   const fetchLiveResults = async () => {
     try {
       const res = await axios.get(
@@ -142,6 +146,10 @@ function TeacherDashboard() {
       console.error("Failed to fetch results:", err);
     }
   };
+
+  // Participants modal
+  const openParticipantsModal = () => setShowParticipantsModal(true);
+  const closeParticipantsModal = () => setShowParticipantsModal(false);
 
   const handleCopyPollId = async () => {
     try {
@@ -157,9 +165,10 @@ function TeacherDashboard() {
   if (!poll) return <p className="text-center mt-10">Poll not found ❌</p>;
 
   const displayOptions = activeQuestion?.options || [];
+  const participants = poll.participants || [];
 
   return (
-    <div className="w-screen h-screen min-h-screen max-h-200 overflow-auto p-6 bg-gray-50 relative">
+    <div className="w-screen h-screen relative p-6 bg-gray-50">
       {/* Intervue Poll Badge */}
       {!activeQuestion && (
         <div className="absolute top-6 left-6 ml-5 flex items-center gap-2 w-[134px] h-[31px] bg-gradient-to-r from-[#7565D9] to-[#4D0ACD] rounded-[24px] px-2 py-0">
@@ -199,9 +208,8 @@ function TeacherDashboard() {
           <div className="flex justify-between items-center bg-gray-800 text-white font-semibold p-2 rounded-t">
             <span>{activeQuestion.text}</span>
             <span
-              className={`font-bold ${
-                timeLeft <= 10 ? "text-red-500" : "text-yellow-300"
-              }`}
+              className={`font-bold ${timeLeft <= 10 ? "text-red-500" : "text-yellow-300"
+                }`}
             >
               {timeLeft > 0 ? `${timeLeft}s` : "Time's up"}
             </span>
@@ -221,9 +229,8 @@ function TeacherDashboard() {
                 >
                   {results && (
                     <div
-                      className={`absolute top-0 left-0 h-full ${
-                        isCorrect ? "bg-green-400" : "bg-purple-500"
-                      } opacity-50 rounded-l`}
+                      className={`absolute top-0 left-0 h-full ${isCorrect ? "bg-green-400" : "bg-purple-500"
+                        } opacity-50 rounded-l`}
                       style={{ width: `${percentage}%` }}
                     />
                   )}
@@ -266,7 +273,6 @@ function TeacherDashboard() {
             <h2 className="text-xl font-semibold">Enter your question</h2>
 
             <div className="flex items-center gap-2 mr-65">
-              <label className="font-semibold"></label>
               <select
                 value={timeLimit}
                 onChange={(e) => setTimeLimit(Number(e.target.value))}
@@ -284,7 +290,10 @@ function TeacherDashboard() {
           </div>
 
           {/* Question Textarea */}
-          <div className="relative w-full mb-4" style={{ minHeight: 200, maxHeight: 50 }}>
+          <div
+            className="relative w-full mb-4"
+            style={{ minHeight: 200, maxHeight: 50 }}
+          >
             <textarea
               placeholder="Enter your question"
               value={questionText}
@@ -358,6 +367,82 @@ function TeacherDashboard() {
           >
             {submitting ? "Submitting..." : "Ask Question"}
           </button>
+        </div>
+      )}
+
+      {/* Floating participants button */}
+      <div
+        onClick={openParticipantsModal}
+        className="fixed bottom-10 right-10 mb-12 flex flex-row items-center justify-center  gap-2 w-[80px] h-[76px] bg-purple-700 rounded-lg cursor-pointer shadow-lg z-50"
+      >
+        <span className="text-white font-bold text-center text-sm">
+          
+        </span>
+      </div>
+
+      {/* Participants modal */}
+      {showParticipantsModal && (
+        <div className="fixed top-0 left-0 w-screen h-screen bg-black/30 flex items-center justify-center z-50">
+          <div
+            className="relative bg-white border border-[#CECECE] rounded-md shadow-lg"
+            style={{ width: "429px", height: "477px" }}
+          >
+            {/* Modal Header */}
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="font-semibold text-lg">Participants</h3>
+              <button onClick={closeParticipantsModal} className="text-gray-500">
+                X
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            {/* Show Participants Button ONLY when question is active and timer is 0 */}
+{activeQuestion && timeLeft === 0 && (
+  <div
+    onClick={openParticipantsModal}
+    className="fixed bottom-10 right-10 flex flex-row items-center justify-center p-[19px_20px_14px] gap-2 w-[80px] h-[76px] bg-purple-700 rounded-lg cursor-pointer shadow-lg z-50"
+  >
+    <span className="text-white font-bold text-center text-sm">
+      Participants
+    </span>
+  </div>
+)}
+
+{/* Participants Modal */}
+{showParticipantsModal && activeQuestion && timeLeft === 0 && (
+  <div className="fixed top-0 left-0 w-screen h-screen bg-black/30 flex items-center justify-center z-50">
+    <div
+      className="relative bg-white border border-[#CECECE] rounded-md shadow-lg"
+      style={{ width: "429px", height: "477px" }}
+    >
+      {/* Modal Header */}
+      <div className="flex justify-between items-center p-4 border-b">
+        <h3 className="font-semibold text-lg">Participants</h3>
+        <button onClick={closeParticipantsModal} className="text-gray-500">
+          X
+        </button>
+      </div>
+
+      {/* Modal Content */}
+      <div className="p-4 overflow-auto h-[calc(100%-64px)]">
+        {participants.length > 0 ? (
+          <ul className="space-y-2">
+            {participants.map((p, idx) => (
+              <li key={idx} className="border-b pb-2">
+                {p.name || p.studentId || `Student ${idx + 1}`}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No participants yet.</p>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
+
+          </div>
         </div>
       )}
     </div>

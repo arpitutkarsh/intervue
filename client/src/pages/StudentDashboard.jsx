@@ -13,13 +13,15 @@ function StudentDashboard() {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [submitted, setSubmitted] = useState(false);
 
-  // Fetch active question and calculate remaining time
+  // Fetch active question periodically
   useEffect(() => {
     if (!pollId) return;
 
     const fetchQuestion = async () => {
       try {
-        const res = await axios.get(`https://intervue-backend-lltr.onrender.com/api/polls/${pollId}`);
+        const res = await axios.get(
+          `https://intervue-backend-lltr.onrender.com/api/polls/${pollId}`
+        );
         const active = res.data.data.activeQuestion;
 
         if (active && active._id !== questionId) {
@@ -29,24 +31,24 @@ function StudentDashboard() {
           setSubmitted(false);
           setResults(null);
 
-          // Calculate remaining time based on startedAt
           const now = new Date();
           const startedAt = new Date(active.startedAt);
           const remaining = Math.max(
             0,
-            Math.ceil((startedAt.getTime() + active.timeLimitSec * 1000 - now.getTime()) / 1000)
+            Math.ceil(
+              (startedAt.getTime() + active.timeLimitSec * 1000 - now.getTime()) /
+                1000
+            )
           );
           setTimeLeft(remaining);
 
           if (remaining === 0) fetchLiveResults();
         }
 
-        // If question ended but results not yet fetched
         if (active && active.ended && !results) {
           fetchLiveResults();
         }
 
-        // If no active question, clear state
         if (!active) {
           setQuestion(null);
           setQuestionId(null);
@@ -61,7 +63,7 @@ function StudentDashboard() {
     };
 
     fetchQuestion();
-    const interval = setInterval(fetchQuestion, 2000); // poll every 2s
+    const interval = setInterval(fetchQuestion, 2000);
     return () => clearInterval(interval);
   }, [pollId, questionId, results]);
 
@@ -70,10 +72,9 @@ function StudentDashboard() {
     if (!question || timeLeft <= 0) return;
 
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev <= 1) {
-          // Timer ends
-          if (question.ended) fetchLiveResults();
+          fetchLiveResults();
           return 0;
         }
         return prev - 1;
@@ -87,11 +88,14 @@ function StudentDashboard() {
   const submitAnswer = async () => {
     if (selectedIndex === null || submitted || timeLeft === 0) return;
     try {
-      await axios.post("https://intervue-backend-lltr.onrender.com/api/polls/submit-answer", {
-        pollId,
-        studentName: name,
-        answerIndex: selectedIndex,
-      });
+      await axios.post(
+        "https://intervue-backend-lltr.onrender.com/api/polls/submit-answer",
+        {
+          pollId,
+          studentName: name,
+          answerIndex: selectedIndex,
+        }
+      );
       setSubmitted(true);
     } catch (err) {
       console.error("Failed to submit answer:", err);
@@ -102,7 +106,9 @@ function StudentDashboard() {
   // Fetch live results
   const fetchLiveResults = async () => {
     try {
-      const res = await axios.get(`https://intervue-backend-lltr.onrender.com/api/polls/${pollId}/live-result`);
+      const res = await axios.get(
+        `https://intervue-backend-lltr.onrender.com/api/polls/${pollId}/live-result`
+      );
       setResults(res.data.data);
     } catch (err) {
       console.error("Failed to fetch results:", err);
@@ -121,63 +127,71 @@ function StudentDashboard() {
           Wait for the teacher to ask questions...
         </div>
       ) : (
-        <>
-          <div className="w-full max-w-xl border rounded-lg p-4 flex flex-col gap-4">
-            {/* Question Header */}
-            <div className="flex justify-between items-center bg-gray-800 text-white font-semibold p-2 rounded">
-              <span>{question?.text || results?.question}</span>
-              <span className={`font-bold ${timeLeft <= 10 && timeLeft > 0 ? "text-red-500" : "text-yellow-300"}`}>
-                {timeLeft > 0 ? `${timeLeft}s` : "Time's up"}
-              </span>
-            </div>
-
-            {/* Options */}
-            <div className="flex flex-col gap-3 mt-2">
-              {options.map((opt, idx) => {
-                const isSelected = selectedIndex === idx;
-                const isCorrect = results && idx === results.correctAnswerIndex;
-                const percentage = totalAnswers > 0 ? Math.round((counts[idx] / totalAnswers) * 100) : 0;
-
-                return (
-                  <div
-                    key={idx}
-                    className={`relative w-full h-12 border rounded-lg overflow-hidden flex items-center justify-between px-4 cursor-pointer
-                      ${isSelected && !results ? "border-blue-500 bg-blue-100" : "bg-gray-100"}
-                      ${submitted && isSelected && !results ? "bg-blue-200" : ""}
-                      ${results && isCorrect ? "bg-green-200" : ""}`}
-                    onClick={() => !submitted && !results && setSelectedIndex(idx)}
-                  >
-                    {/* Progress bar */}
-                    {results && (
-                      <div
-                        className={`absolute top-0 left-0 h-full ${isCorrect ? "bg-green-400" : "bg-purple-500"} opacity-50`}
-                        style={{ width: `${percentage}%` }}
-                      />
-                    )}
-                    <span className="relative z-10">{opt}</span>
-                    {results && <span className="relative z-10">{percentage}% ({counts[idx]})</span>}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Submit button */}
-            {!submitted && selectedIndex !== null && !results && timeLeft > 0 && (
-              <button
-                onClick={submitAnswer}
-                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Submit Answer
-              </button>
-            )}
-
-            {/* Results info */}
-            {results && (
-              <span className="text-sm text-gray-600 mt-2">
-                Answers: {totalAnswers} / {totalParticipants} participants
-              </span>
-            )}
+        <div className="w-full max-w-xl border rounded-lg p-4 flex flex-col gap-4">
+          {/* Question Header */}
+          <div className="flex justify-between items-center bg-gray-800 text-white font-semibold p-2 rounded">
+            <span>{question?.text || results?.question}</span>
+            <span
+              className={`font-bold ${
+                timeLeft <= 10 && timeLeft > 0 ? "text-red-500" : "text-yellow-300"
+              }`}
+            >
+              {timeLeft > 0 ? `${timeLeft}s` : "Time's up"}
+            </span>
           </div>
+
+          {/* Options */}
+          <div className="flex flex-col gap-3 mt-2">
+            {options.map((opt, idx) => {
+              const isSelected = selectedIndex === idx;
+              const isCorrect = results && idx === results.correctAnswerIndex;
+              const percentage =
+                totalAnswers > 0 ? Math.round((counts[idx] / totalAnswers) * 100) : 0;
+
+              return (
+                <div
+                  key={idx}
+                  className={`relative w-full h-12 border rounded-lg overflow-hidden flex items-center justify-between px-4 cursor-pointer
+                    ${!results && isSelected ? "bg-blue-200 border-blue-500" : "bg-gray-100"}
+                    ${results && isCorrect ? "bg-green-200" : ""}`}
+                  onClick={() => !submitted && !results && setSelectedIndex(idx)}
+                >
+                  {/* Percentage bar */}
+                  {results && (
+                    <div
+                      className={`absolute top-0 left-0 h-full ${
+                        isCorrect ? "bg-green-400" : "bg-purple-500"
+                      } opacity-50`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  )}
+                  <span className="relative z-10">{opt}</span>
+                  {results && (
+                    <span className="relative z-10">
+                      {percentage}% ({counts[idx]})
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Submit button */}
+          {!submitted && selectedIndex !== null && !results && timeLeft > 0 && (
+            <button
+              onClick={submitAnswer}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Submit Answer
+            </button>
+          )}
+
+          {/* Results info */}
+          {results && (
+            <span className="text-sm text-gray-600 mt-2">
+              Answers: {totalAnswers} / {totalParticipants} participants
+            </span>
+          )}
 
           {/* Waiting message when timer ends */}
           {timeLeft === 0 && !results && (
@@ -185,7 +199,7 @@ function StudentDashboard() {
               Wait for the teacher to ask a question...
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
