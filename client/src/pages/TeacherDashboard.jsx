@@ -158,30 +158,30 @@ function TeacherDashboard() {
 
   const displayOptions = activeQuestion?.options || [];
 
-  // Calculate textarea height (subtract headers, buttons, options)
-  const textareaHeight = windowHeight - 300; // adjust 300 as needed
-
   return (
-    <div className="w-screen h-screen min-h-screen max-h-200 overflow-auto p-6  bg-gray-50 relative">
+    <div className="w-screen h-screen min-h-screen max-h-200 overflow-auto p-6 bg-gray-50 relative">
       {/* Intervue Poll Badge */}
-      <div className="absolute top-6 left-6 ml-5 flex items-center gap-2 w-[134px] h-[31px] bg-gradient-to-r from-[#7565D9] to-[#4D0ACD] rounded-[24px] px-2 py-0">
-        <div className="w-[14.66px] h-[14.65px] bg-white rounded-full"></div>
-        <span className="text-white font-sora font-semibold text-[14px] leading-[18px]">
-          Intervue Poll
-        </span>
-      </div>
-
-      {/* Poll ID */}
-      
+      {!activeQuestion && (
+        <div className="absolute top-6 left-6 ml-5 flex items-center gap-2 w-[134px] h-[31px] bg-gradient-to-r from-[#7565D9] to-[#4D0ACD] rounded-[24px] px-2 py-0">
+          <div className="w-[14.66px] h-[14.65px] bg-white rounded-full"></div>
+          <span className="text-white font-sora font-semibold text-[14px] leading-[18px]">
+            Intervue Poll
+          </span>
+        </div>
+      )}
 
       {/* Header */}
-      <h2 className="text-4xl mt-8 ml-5">
-        Let's <span className="font-bold">Get Started</span>
-      </h2>
-      <p className="mb-6 ml-5">
-        you’ll have the ability to create and manage polls, ask questions, and
-        monitor your students' responses in real-time.
-      </p>
+      {!activeQuestion && (
+        <>
+          <h2 className="text-4xl mt-8 ml-5">
+            Let's <span className="font-bold">Get Started</span>
+          </h2>
+          <p className="mb-6 ml-5">
+            you’ll have the ability to create and manage polls, ask questions, and
+            monitor your students' responses in real-time.
+          </p>
+        </>
+      )}
 
       {/* View Poll History */}
       <button
@@ -195,7 +195,7 @@ function TeacherDashboard() {
 
       {/* Active Question */}
       {activeQuestion && (
-        <div className="w-full max-w-full h-[60vh] border border-purple-300 rounded-lg p-4 flex flex-col gap-4 relative mt-4 overflow-auto">
+        <div className="w-full max-w-full h-[60vh] border border-purple-300 rounded-lg p-4 flex flex-col gap-4 relative mt-15 overflow-auto">
           <div className="flex justify-between items-center bg-gray-800 text-white font-semibold p-2 rounded-t">
             <span>{activeQuestion.text}</span>
             <span
@@ -252,7 +252,7 @@ function TeacherDashboard() {
             setActiveQuestion(null);
             setResults(null);
           }}
-          className="mt-4  bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800"
+          className="mt-4 bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800"
         >
           Ask a New Question
         </button>
@@ -284,7 +284,7 @@ function TeacherDashboard() {
           </div>
 
           {/* Question Textarea */}
-          <div className="relative w-full mb-4" style={{  minHeight:200 , maxHeight:50 }}>
+          <div className="relative w-full mb-4" style={{ minHeight: 200, maxHeight: 50 }}>
             <textarea
               placeholder="Enter your question"
               value={questionText}
@@ -296,7 +296,9 @@ function TeacherDashboard() {
               {questionText.length}/100
             </span>
           </div>
-                <p className="mb-2">Edit Options</p>
+
+          <p className="mb-2">Edit Options</p>
+
           {/* Options */}
           <div className="mb-3">
             {options.map((opt, i) => (
@@ -347,12 +349,12 @@ function TeacherDashboard() {
               + Add more Option
             </button>
           </div>
-            <hr className="mt-5 mb-3"/>
+          <hr className="mt-5 mb-3" />
           {/* Submit */}
           <button
             onClick={handleAskQuestion}
             disabled={submitting}
-            className="bg-purple-700 text-white py-3 px-2 ml-330 bg-gradient-to-l from-purple-800 to-blue-800  rounded-full hover:bg-purple-800 disabled:opacity-50"
+            className="bg-purple-700 text-white py-3 px-2 ml-330 bg-gradient-to-l from-purple-800 to-blue-800 rounded-full hover:bg-purple-800 disabled:opacity-50"
           >
             {submitting ? "Submitting..." : "Ask Question"}
           </button>
