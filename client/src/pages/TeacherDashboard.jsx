@@ -376,7 +376,7 @@ function TeacherDashboard() {
         className="fixed bottom-10 right-10 mb-12 flex flex-row items-center justify-center  gap-2 w-[80px] h-[76px] bg-purple-700 rounded-lg cursor-pointer shadow-lg z-50"
       >
         <span className="text-white font-bold text-center text-sm">
-          
+          Participant
         </span>
       </div>
 
