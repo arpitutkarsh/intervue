@@ -12,6 +12,7 @@ function StudentDashboard() {
   const [results, setResults] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [waiting, setWaiting] = useState(true); // Track waiting state
 
   // Fetch active question periodically
   useEffect(() => {
@@ -36,17 +37,18 @@ function StudentDashboard() {
           const remaining = Math.max(
             0,
             Math.ceil(
-              (startedAt.getTime() + active.timeLimitSec * 1000 - now.getTime()) /
-                1000
+              (startedAt.getTime() + active.timeLimitSec * 1000 - now.getTime()) / 1000
             )
           );
           setTimeLeft(remaining);
+          setWaiting(false);
 
           if (remaining === 0) fetchLiveResults();
         }
 
         if (active && active.ended && !results) {
           fetchLiveResults();
+          setWaiting(false);
         }
 
         if (!active) {
@@ -56,6 +58,7 @@ function StudentDashboard() {
           setSelectedIndex(null);
           setSubmitted(false);
           setResults(null);
+          setWaiting(true); // Show waiting message when no active question
         }
       } catch (err) {
         console.error(err);
@@ -110,6 +113,7 @@ function StudentDashboard() {
         `https://intervue-backend-lltr.onrender.com/api/polls/${pollId}/live-result`
       );
       setResults(res.data.data);
+      setWaiting(false);
     } catch (err) {
       console.error("Failed to fetch results:", err);
     }
@@ -122,11 +126,15 @@ function StudentDashboard() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4 gap-4">
-      {!question && !results ? (
+      {/* Waiting message */}
+      {waiting && (
         <div className="text-3xl font-semibold text-center">
-          Wait for the teacher to ask questions...
+          Wait for the teacher to ask a question...
         </div>
-      ) : (
+      )}
+
+      {/* Question / Results Card */}
+      {!waiting && (
         <div className="w-full max-w-xl border rounded-lg p-4 flex flex-col gap-4">
           {/* Question Header */}
           <div className="flex justify-between items-center bg-gray-800 text-white font-semibold p-2 rounded">
@@ -191,13 +199,6 @@ function StudentDashboard() {
             <span className="text-sm text-gray-600 mt-2">
               Answers: {totalAnswers} / {totalParticipants} participants
             </span>
-          )}
-
-          {/* Waiting message when timer ends */}
-          {timeLeft === 0 && !results && (
-            <div className="text-2xl font-semibold text-center mt-4 text-gray-700">
-              Wait for the teacher to ask a question...
-            </div>
           )}
         </div>
       )}
